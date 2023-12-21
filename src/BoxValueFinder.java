@@ -1,4 +1,4 @@
-import java.io.*;
+
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.io.BufferedReader;
@@ -6,45 +6,36 @@ import java.io.InputStreamReader;
 import java.util.Stack;
 
 public class BoxValueFinder {
-    int sno = 1;
+    private String result;
 
-    public void fileIterator(){
+    public void setResult(String result) {
+        this.result = result;
+    }
+
+    public String getResult() {
+        return result;
+    }
+
+    public void formatProfileId(String profileLink){
         try{
-            BufferedReader br = new BufferedReader(new FileReader("input.txt"));
-            FileOutputStream fos = new FileOutputStream("Output.txt");
-            String format = String.format("%s:%s:%s:%s:%s:%s:%s","S.no","Name","Dept","Total","Easy","Medium","Hard");
-            fos.write(format.getBytes());
-            String row = "";
-            while((row = br.readLine()) != null){
-                int fromIndex = row.indexOf("https://leetcode.com/");
-                if(fromIndex == -1){
-                    fos.write(("\nInvalid link is provided").getBytes());
-                    continue;
+            int[] value;
+                int index = profileLink.indexOf("https://leetcode.com/");
+                if(index == -1){
+                    String url = "https://leetcode.com/" + profileLink + "/";
+                    String lineValue = lineFinder(url);
+                    value = valueFinder(lineValue);
                 }
-                int end = row.length();
-                String profileLink = row.substring(fromIndex,end);
-                String lineValue = lineFinder(profileLink,fos);
+                else{
+                    String lineValue = lineFinder(profileLink);
+                    value = valueFinder(lineValue);
+                }
+            displayValue(value);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
 
-                int []values = valueFinder(lineValue);
-                storeValueInFile(row ,fromIndex ,values ,fos);
-            }
-            fos.close();
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-    }
-    public void storeValueInFile(String row,int end,int [] value, FileOutputStream fos){
-        try{
-            String name = row.substring(0,end-3);
-            String department = row.substring(end-3,end);
-            String format = String.format("\n%s:%s:%s:%s:%s:%s:%s",sno,name,department,value[0],value[1],value[2],value[3]);
-            fos.write(format.getBytes());
-            sno++;
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-    }
-    public String lineFinder(String urll,FileOutputStream fos){
+    public String lineFinder(String urll){
         try{
             URL url = new URL(urll);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -61,26 +52,30 @@ public class BoxValueFinder {
                 // Reading the response
                 BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 String line;
-                StringBuilder response = new StringBuilder();
-                BufferedWriter bw = new BufferedWriter(new FileWriter("check.txt"));
+
                 while ((line = reader.readLine()) != null) {
                     //bw.write(line);
                     if(line.contains("{\"acSubmissionNum"))
                     {
                         return line;
-                       // break;
                     }
                 }
             }
         }catch(Exception e){
-            try{
-                fos.write(("\nInvalid link is provided").getBytes());
-            }catch(Exception ignored){
-
-            }
+            e.printStackTrace();
         }
         return "";
     }
+    public void displayValue(int [] value){
+        try{
+            String format = String.format("Total : %s  Easy : %s  Medium : %s  Hard : %s",value[0],value[1],value[2],value[3]);
+
+            setResult(format);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
     public int[] valueFinder(String str){
         int index = str.indexOf("{\"acSubmissionNum");
         int start = index;
