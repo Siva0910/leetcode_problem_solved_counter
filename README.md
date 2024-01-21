@@ -1,4 +1,4 @@
-This is a app to find the leetcode problem solved count using a profile user or profile link
+This is a gui based app to find the leetcode problem solved count using a profile user or profile link
 
 **System Requirements **
 java 1.8 used
