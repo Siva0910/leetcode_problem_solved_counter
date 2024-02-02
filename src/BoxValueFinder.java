@@ -104,6 +104,8 @@ public class BoxValueFinder {
                 count[k++] = val;
             }
         }
+        int daa = 100;
+        System.out.println(daa);
         return count;
     }
 }
