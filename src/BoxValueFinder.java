@@ -37,6 +37,7 @@ public class BoxValueFinder {
 
     public String lineFinder(String urll){
         try{
+            @SuppressWarnings("deprecation")
             URL url = new URL(urll);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
