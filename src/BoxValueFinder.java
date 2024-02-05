@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 import java.util.Stack;
 
 public class BoxValueFinder {
-    private String result;
+    private String result="";
 
     public void setResult(String result) {
         this.result = result;
@@ -20,13 +20,35 @@ public class BoxValueFinder {
         try{
             int[] value;
                 int index = profileLink.indexOf("https://leetcode.com/");
-                if(index == -1){
+                if(index == -1) // user name
+                {
                     String url = "https://leetcode.com/" + profileLink + "/";
                     String lineValue = lineFinder(url);
-                    value = valueFinder(lineValue);
+                    if(!lineValue.isEmpty())
+                    {
+                        value = valueFinder(lineValue);
+                    }
+                    else{
+                        InvalidInput invalidInput = new InvalidInput();
+                        invalidInput.invalidUserName();
+                        return ;
+                    }
                 }
+                // profile link
                 else{
                     String lineValue = lineFinder(profileLink);
+
+                    if(!lineValue.isEmpty())
+                    {
+                        value = valueFinder(lineValue);
+                    }
+                    else{
+
+                        InvalidInput invalidInput = new InvalidInput();
+                        invalidInput.invalidProfileLink();
+
+                        return ;
+                    }
                     value = valueFinder(lineValue);
                 }
             displayValue(value);
@@ -40,21 +62,20 @@ public class BoxValueFinder {
             URL url = new URL(urll);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
-            // Set User-Agent header
+            // Setting User-Agent in header
             connection.setRequestProperty("User-Agent", "Mozilla/5.0");
 
-            // Add cookies if necessary
-            // connection.setRequestProperty("Cookie", "name=value");
-
             int responseCode = connection.getResponseCode();
+            //System.out.println(responseCode);
 
             if (responseCode == HttpURLConnection.HTTP_OK) {
                 // Reading the response
-                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                InputStreamReader inputStreamReader = new InputStreamReader(connection.getInputStream());
+                BufferedReader reader = new BufferedReader(inputStreamReader);
                 String line;
 
                 while ((line = reader.readLine()) != null) {
-                    //bw.write(line);
+
                     if(line.contains("{\"acSubmissionNum"))
                     {
                         return line;
@@ -68,7 +89,7 @@ public class BoxValueFinder {
     }
     public void displayValue(int [] value){
         try{
-            String format = String.format("Total : %s  Easy : %s  Medium : %s  Hard : %s",value[0],value[1],value[2],value[3]);
+            String format = String.format("Easy     : %s,Medium : %s,Hard     : %s,Total     : %s",value[1],value[2],value[3],value[0]);
 
             setResult(format);
         }catch(Exception e){
@@ -79,10 +100,12 @@ public class BoxValueFinder {
     public int[] valueFinder(String str){
         int index = str.indexOf("{\"acSubmissionNum");
         int start = index;
+        int []count = new int[4];
         Stack <Character> st = new Stack<>();
+
         if(index == -1) return null;
         st.push(str.charAt(index++));
-        //index++;
+
         while(!st.isEmpty()){
             if(str.charAt(index) == '{')
                 st.push(str.charAt(index));
@@ -90,22 +113,24 @@ public class BoxValueFinder {
                 st.pop();
             index++;
         }
+
         int end = index;
-        int []count = new int[4];
+
         String solvedCount = str.substring(start,end);
         int k=0;
+
         for(int i=0;i<solvedCount.length();i++){
             if(Character.isDigit(solvedCount.charAt(i))){
                 int val=0;
                 while(Character.isDigit(solvedCount.charAt(i))){
-                    val = val * 10 + Integer.parseInt(String.valueOf(solvedCount.charAt(i)));
+                    String stringInteger = String.valueOf(solvedCount.charAt(i));
+                    val = val * 10 + Integer.parseInt(stringInteger);
                     i++;
                 }
                 count[k++] = val;
             }
         }
-        int daa = 100;
-        System.out.println(daa);
+
         return count;
     }
 }
